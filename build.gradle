@@ -59,7 +59,7 @@ test {
     }
 }
 
-//mainClass = 'org.hyperledger.fabric.contract.ContractRouter'
+mainClass = 'org.hyperledger.fabric.contract.ContractRouter'
 
 shadowJar {
     archiveBaseName = 'chaincode'

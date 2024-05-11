@@ -4,6 +4,7 @@ import com.owlike.genson.annotation.JsonProperty;
 import org.hyperledger.fabric.contract.annotation.DataType;
 import org.hyperledger.fabric.contract.annotation.Property;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 @DataType
@@ -74,6 +75,27 @@ public class DriverAsset {
         return rideCosts;
     }
 
+    public void setLicensePlate(String licensePlate) {
+        this.licensePlate = licensePlate;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public void setEmissionType(String emissionType) {
+        this.emissionType = emissionType;
+    }
+
+    public void setDrivenKilometersOnRoad(double[] drivenKilometersOnRoad) {
+        this.drivenKilometersOnRoad = drivenKilometersOnRoad;
+    }
+
+    public void setRideCosts(double rideCosts) {
+        this.rideCosts = rideCosts;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -86,15 +108,37 @@ public class DriverAsset {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getDriverAssetId(), getLicensePlate(), getBrand(), getEmissionType(), getDrivenKilometersOnRoad(), getRideCosts());
+        int result = Objects.hash(driverAssetId, licensePlate, brand, emissionType, rideCosts);
+        result = 31 * result + Arrays.hashCode(drivenKilometersOnRoad);
+        return result;
     }
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode())
-                + "[driverAssetId=" + driverAssetId + ", licensePlate=" + licensePlate
-                + ", brand=" + brand + ", emissionType=" + emissionType
-                + ", drivenKilometersOnRoad=" + drivenKilometersOnRoad + ", rideCosts="
-                + rideCosts + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        sb.append("\"driverAssetId\": \"" + driverAssetId + "\", ");
+        sb.append("\"licensePlate\": \"" + licensePlate + "\", ");
+        sb.append("\"brand\": \"" + brand + "\", ");
+        sb.append("\"emissionType\": \"" + emissionType + "\", ");
+        sb.append("\"drivenKilometersOnRoad\": " + Arrays.toString(drivenKilometersOnRoad) + ", ");
+        sb.append("\"rideCosts\": " + rideCosts);
+        sb.append("}");
+        return sb.toString();
+    }
+//    @Override
+//    public String toString() {
+//        return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode())
+//                + " [driverAssetId=" + driverAssetId + ", licensePlate=" + licensePlate
+//                + ", brand=" + brand + ", emissionType=" + emissionType
+//                + ", drivenKilometersOnRoad=" + Arrays.toString(drivenKilometersOnRoad) + ", rideCosts="
+//                + rideCosts + "]";
+//    }
+
+    public String lazyToString() {
+        return "{ \"driverAssetId\":\"" + driverAssetId + "\", \"licensePlate\":\"" + licensePlate
+                + "\", \"brand\":\"" + brand + "\", \"emissionType\":\"" + emissionType
+                + "\", \"drivenKilometersOnRoad\":" + Arrays.toString(drivenKilometersOnRoad) + ", \"rideCosts\":"
+                + rideCosts + "}";
     }
 }

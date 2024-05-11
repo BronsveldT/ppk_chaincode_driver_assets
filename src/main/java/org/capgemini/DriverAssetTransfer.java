@@ -6,11 +6,15 @@ import org.hyperledger.fabric.contract.annotation.*;
 import org.hyperledger.fabric.shim.Chaincode;
 import org.hyperledger.fabric.shim.ChaincodeException;
 import org.hyperledger.fabric.shim.ChaincodeStub;
+import org.hyperledger.fabric.shim.ledger.KeyValue;
 
 import javax.ws.rs.core.Response;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.sql.Driver;
+import java.util.ArrayList;
+import java.util.List;
+import org.hyperledger.fabric.shim.ledger.QueryResultsIterator;
 
 @Contract(
         name = "driverAsset",
@@ -31,6 +35,34 @@ import java.sql.Driver;
 public class DriverAssetTransfer {
 
     private final Genson genson = new Genson();
+
+    /**
+     * Retrieves all assets from the ledger.
+     *
+     * @param ctx the transaction context
+     * @return array of assets found on the ledger
+     */
+    @Transaction(intent = Transaction.TYPE.EVALUATE)
+    public String GetAllAssets(final Context ctx) {
+        ChaincodeStub stub = ctx.getStub();
+
+        List<DriverAsset> queryResults = new ArrayList<>();
+
+        // To retrieve all assets from the ledger use getStateByRange with empty startKey & endKey.
+        // Giving empty startKey & endKey is interpreted as all the keys from beginning to end.
+        // As another example, if you use startKey = 'asset0', endKey = 'asset9' ,
+        // then getStateByRange will retrieve asset with keys between asset0 (inclusive) and asset9 (exclusive) in lexical order.
+        QueryResultsIterator<KeyValue> results = stub.getStateByRange("", "");
+
+        for (KeyValue result: results) {
+            DriverAsset asset = genson.deserialize(result.getStringValue(), DriverAsset.class);
+            queryResults.add(asset);
+        }
+
+        final String response = genson.serialize(queryResults);
+        System.out.println(response);
+        return response;
+    }
 
     private enum AssetTransferErrors {
         ASSET_NOT_FOUND,
@@ -55,7 +87,7 @@ public class DriverAssetTransfer {
      */
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public Response createDriverAsset(final Context ctx,
+    public DriverAsset createDriverAsset(final Context ctx,
                                       final String driverId) {
 
         ChaincodeStub stub = ctx.getStub();
@@ -69,8 +101,7 @@ public class DriverAssetTransfer {
 
         String sortedJson = genson.serialize(driverAsset);
         stub.putStringState(driverId, sortedJson);
-        Response resp = Response.ok("The driverAsset was stored").build();
-        return resp;
+        return driverAsset;
     }
 
     /**
@@ -80,22 +111,22 @@ public class DriverAssetTransfer {
      * @return
      */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
-    public Response readDriverAsset(final Context ctx, final String driverId) {
+    public DriverAsset readDriverAsset(final Context ctx, final String driverId) {
         ChaincodeStub stub = ctx.getStub();
         String assetJSON = stub.getStringState(driverId);
 
-        if(assetJSON != null && !assetJSON.isEmpty()){
+        if(assetJSON == null || assetJSON.isEmpty()){
             String errorMessage = String.format("Asset %s does not exist", driverId);
             System.out.println(errorMessage);
             throw new ChaincodeException(errorMessage, DriverAssetTransfer.AssetTransferErrors.ASSET_NOT_FOUND.toString());
         }
-
+        System.out.println(assetJSON);
         DriverAsset driverAsset = genson.deserialize(assetJSON, DriverAsset.class);
-        return Response.ok("The driverAsset was created").build();
+        return driverAsset;
     }
 
     @Transaction(intent = Transaction.TYPE.SUBMIT)
-    public Response updateDriverAsset(final Context ctx,
+    public DriverAsset updateDriverAsset(final Context ctx,
                                       final String driverId,
                                       final double[] distanceTravelledOn) {
 
@@ -111,7 +142,7 @@ public class DriverAssetTransfer {
         driverAsset.addDrivenKilometersOnRoad(distanceTravelledOn);
         String sortedJson = genson.serialize(driverAsset);
         stub.putStringState(driverAsset.getDriverAssetId(), sortedJson);
-        return Response.ok("The driverAsset was stored").build();
+        return driverAsset;
     }
 
     /**
