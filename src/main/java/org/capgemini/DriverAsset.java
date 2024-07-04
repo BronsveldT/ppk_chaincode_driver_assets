@@ -31,6 +31,16 @@ public class DriverAsset {
 
     public DriverAsset(@JsonProperty("driverAssetId") String driverAssetId,
                        @JsonProperty("licensePlate") String licensePlate,
+                       @JsonProperty("emissionType") String emissionType,
+                       @JsonProperty("brand") String brand) {
+        this.driverAssetId = driverAssetId;
+        this.licensePlate = licensePlate;
+        this.brand = brand;
+        this.emissionType = emissionType;
+    }
+
+    public DriverAsset(@JsonProperty("driverAssetId") String driverAssetId,
+                       @JsonProperty("licensePlate") String licensePlate,
                        @JsonProperty("brand") String brand,
                        @JsonProperty("emissionType") String emissionType,
                        @JsonProperty("drivenKilometersOnRoad") double[] drivenKilometersOnRoad,
@@ -65,6 +75,10 @@ public class DriverAsset {
     }
 
     public void addDrivenKilometersOnRoad(double[] drivenKilometers) {
+        if(drivenKilometersOnRoad == null) {
+            drivenKilometersOnRoad = new double[5];
+            System.out.println(drivenKilometersOnRoad.length);
+        }
 
         for (int i = 0; i < drivenKilometersOnRoad.length; i++) {
             drivenKilometersOnRoad[i] += drivenKilometers[i];
