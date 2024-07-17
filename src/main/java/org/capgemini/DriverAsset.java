@@ -109,7 +109,9 @@ public class DriverAsset {
         this.rideCosts = rideCosts;
     }
 
-
+    public void addRideCosts(double rideCosts) {
+        this.rideCosts += rideCosts;
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

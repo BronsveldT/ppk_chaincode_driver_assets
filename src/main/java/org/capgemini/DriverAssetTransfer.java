@@ -141,10 +141,12 @@ public class DriverAssetTransfer implements ContractInterface {
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public DriverAsset updateDriverAsset(final Context ctx,
                                       final String driverId,
-                                      final String distanceTravelledOn) {
+                                      final String distanceTravelledOn,
+                                         final String rideCosts) {
 
         ChaincodeStub stub = ctx.getStub();
 
+        double savedRideCosts = Double.parseDouble(rideCosts);
         if(!driverAssetExists(ctx, driverId)){
             String errorMessages = String.format("Driver asset %s does not exist", driverId);
             System.out.println(errorMessages);
@@ -165,6 +167,7 @@ public class DriverAssetTransfer implements ContractInterface {
         }
         DriverAsset driverAsset = genson.deserialize(assetJSON, DriverAsset.class);
         driverAsset.addDrivenKilometersOnRoad(convertedDistanceTravelled);
+        driverAsset.addRideCosts(savedRideCosts);
         String sortedJson = genson.serialize(driverAsset);
         stub.putStringState(driverAsset.getDriverAssetId(), sortedJson);
         return driverAsset;
