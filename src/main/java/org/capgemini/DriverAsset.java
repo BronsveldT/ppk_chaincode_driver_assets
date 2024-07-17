@@ -74,10 +74,16 @@ public class DriverAsset {
         return drivenKilometersOnRoad;
     }
 
+
+    /**
+     * The method used to update the driven kilometers by a specific driver.
+     * The index of the array is equal to the different road categories + 1,
+     * so if we take index 0, the equal road category is 1. Which are national highways.
+     * @param drivenKilometers
+     */
     public void addDrivenKilometersOnRoad(double[] drivenKilometers) {
         if(drivenKilometersOnRoad == null) {
             drivenKilometersOnRoad = new double[5];
-            System.out.println(drivenKilometersOnRoad.length);
         }
 
         for (int i = 0; i < drivenKilometersOnRoad.length; i++) {

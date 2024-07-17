@@ -138,6 +138,14 @@ public class DriverAssetTransfer implements ContractInterface {
         return driverAsset;
     }
 
+    /**
+     *
+     * @param ctx
+     * @param driverId
+     * @param distanceTravelledOn
+     * @param rideCosts
+     * @return a DriverAsset object.
+     */
     @Transaction(intent = Transaction.TYPE.SUBMIT)
     public DriverAsset updateDriverAsset(final Context ctx,
                                       final String driverId,
@@ -146,14 +154,19 @@ public class DriverAssetTransfer implements ContractInterface {
 
         ChaincodeStub stub = ctx.getStub();
 
+        //Because the contract only accepts Strings, we need to parse the String to a double.
         double savedRideCosts = Double.parseDouble(rideCosts);
-        if(!driverAssetExists(ctx, driverId)){
+
+        if(!driverAssetExists(ctx, driverId)){ //Check for driver existence
             String errorMessages = String.format("Driver asset %s does not exist", driverId);
             System.out.println(errorMessages);
             throw new ChaincodeException(errorMessages, DriverAssetTransfer.AssetTransferErrors.ASSET_NOT_FOUND.toString());
         }
         String assetJSON =  stub.getStringState(driverId);
 
+        //Because the contract only accepts Strings, we need to convert the String to an array, so we can process it.
+        //The given String is in the format of: ["675.3","343.45"] and so on. It has a max of 5 possible indices.
+        //The indices of the array are equal to a road category if you add +1 to it. So index 0 is road category 1.
         ObjectMapper mapper = new ObjectMapper();
         double[] convertedDistanceTravelled;
         try {
@@ -162,9 +175,6 @@ public class DriverAssetTransfer implements ContractInterface {
             throw new RuntimeException(e);
         }
 
-        for (int i = 0; i < convertedDistanceTravelled.length; i++) {
-            System.out.println(convertedDistanceTravelled[i]);
-        }
         DriverAsset driverAsset = genson.deserialize(assetJSON, DriverAsset.class);
         driverAsset.addDrivenKilometersOnRoad(convertedDistanceTravelled);
         driverAsset.addRideCosts(savedRideCosts);
@@ -173,7 +183,12 @@ public class DriverAssetTransfer implements ContractInterface {
         return driverAsset;
     }
 
-
+    /**
+     *
+     * @param ctx
+     * @param driverId
+     * @return A string of the DriverAsset object across various points of time.
+     */
     @Transaction(intent = Transaction.TYPE.EVALUATE)
     public String getHistoryForDriverAsset(final Context ctx, final String driverId) {
         ChaincodeStub stub = ctx.getStub();
